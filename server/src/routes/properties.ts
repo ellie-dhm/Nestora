@@ -6,7 +6,7 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 const router = Router();
 const idSchema = z.string().uuid();
 
-const propertySchema = z.object({
+const baseSchema = z.object({
   title: z.string().trim().min(5).max(120),
   description: z.string().trim().min(20).max(5000),
   price: z.coerce.number().int().positive(),
@@ -15,10 +15,15 @@ const propertySchema = z.object({
   bedrooms: z.coerce.number().int().min(0).max(20),
   bathrooms: z.coerce.number().int().min(0).max(20),
   city: z.string().trim().min(2).max(80),
-  status: z.enum(["available", "sold", "rented"]).default("available"),
-  images: z.array(z.string().url()).max(10).default([]),
+  status: z.enum(["available", "sold", "rented"]),
+  images: z.array(z.string().url()).max(10),
 });
-const updateSchema = propertySchema.partial();
+
+const propertySchema = baseSchema.extend({
+  status: baseSchema.shape.status.default("available"),
+  images: baseSchema.shape.images.default([]),
+});
+const updateSchema = baseSchema.partial();
 
 const querySchema = z.object({
   city: z.string().trim().optional(),

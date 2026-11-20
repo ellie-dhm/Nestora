@@ -88,13 +88,24 @@ router.post("/logout", (_req, res) => {
   res.json({ ok: true });
 });
 
-router.get("/me", requireAuth, async (req, res) => {
-  const { rows } = await pool.query(
-    "select id, name, email, role from users where id = $1",
-    [req.user!.id],
-  );
-  if (!rows[0]) return res.status(401).json({ error: "User no longer exists" });
-  res.json({ user: rows[0] });
+router.get("/me", async (req, res) => {
+  const token = req.cookies?.token;
+  if (!token) return res.json({ user: null });
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!) as unknown as {
+      id: string;
+    };
+    const { rows } = await pool.query(
+      "select id, name, email, role from users where id = $1",
+      [payload.id],
+    );
+    res.json({ user: rows[0] ?? null });
+  } catch {
+    // expired or invalid token: treat as logged out
+    res.clearCookie("token", cookieOptions);
+    res.json({ user: null });
+  }
 });
 
 export default router;

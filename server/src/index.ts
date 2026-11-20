@@ -6,15 +6,23 @@ import { pool } from "./db";
 import propertiesRouter from "./routes/properties";
 import authRouter from "./routes/auth";
 import inquiriesRouter from "./routes/inquiries";
+import adminRouter from "./routes/admin";
 
 const app = express();
+
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.set("trust proxy", 1);
+
+app.get("/api/health", async (_req, res) => {
+  const { rows } = await pool.query("select now()");
+  res.json({ ok: true, dbTime: rows[0].now });
+});
+app.use("/api/auth", authRouter);
 app.use("/api/properties", propertiesRouter);
 app.use("/api/inquiries", inquiriesRouter);
-app.set("trust proxy", 1); // needed behind Render's proxy for secure cookies
-app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
 
 // keep this after all routes
 app.use(
@@ -29,9 +37,9 @@ app.use(
   },
 );
 
-app.get("/api/health", async (_req, res) => {
-  const { rows } = await pool.query("select now()");
-  res.json({ ok: true, dbTime: rows[0].now });
-});
-const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`API on ${process.env.PORT}`));
+if (process.env.NODE_ENV !== "test") {
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => console.log(`API on ${port}`));
+}
+
+export default app;
