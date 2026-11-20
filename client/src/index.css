@@ -571,3 +571,39 @@ textarea:focus {
   text-align: center;
   margin-top: 0.5rem;
 }
+/* ---------- Links ---------- */
+a,
+a:visited {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.nav-links a,
+.nav-links a:visited {
+  color: var(--muted);
+}
+.nav-links a:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.brand,
+.brand:visited {
+  color: var(--text);
+}
+.card,
+.card:visited {
+  color: inherit;
+}
+.card:hover {
+  text-decoration: none;
+}
+.back-link {
+  font-size: 0.9rem;
+}
+.admin-table a {
+  font-weight: 500;
+}
